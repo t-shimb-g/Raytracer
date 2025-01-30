@@ -107,13 +107,10 @@ double dot(const Vector3D& a, const Vector3D& b) {
 }
 
 Vector3D cross(const Vector3D& a, const Vector3D& b) {
-    /*
-    double x = (a.y * b.z) - (a.z * b.y);
-    double y = (a.z * b.x) - (a.x * b.z);
-    double z = (a.x * b.y) - (a.y * b.x);
+    const double x = (a.y * b.z) - (a.z * b.y);
+    const double y = (a.z * b.x) - (a.x * b.z);
+    const double z = (a.x * b.y) - (a.y * b.x);
     return Vector3D{x, y, z};
-     */
-    return Vector3D{ (a.y * b.z) - (a.z * b.y), (a.z * b.x) - (a.x * b.z), (a.x * b.y) - (a.y * b.x) };
 }
 
 double length(const Vector3D& v) {
