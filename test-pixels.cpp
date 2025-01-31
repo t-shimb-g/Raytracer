@@ -12,13 +12,10 @@ void set_color(Pixels& pixels, Color color) {
 
 // write a function that produces a single color gradient
 void gradient(Pixels& pixels) {
-    Color temp = {0, 0, 0};
-
     for (int i = 0; i < pixels.columns; ++i) {
         for (int j = 0; j < pixels.rows; ++j) {
-            pixels(j, i) = temp;
+            pixels(j, i) += Color{(j * 1.0) / pixels.columns, (j * 1.0) / pixels.columns, (j * 1.0) / pixels.columns};
         }
-        temp += Color{1.0/pixels.columns, 1.0/pixels.columns, 1.0/pixels.columns};
     }
 }
 
@@ -41,18 +38,22 @@ void pretty(Pixels& pixels) {
 int main() {
     const unsigned columns = 1280;
     const unsigned rows = 720;
-    Pixels pixels{columns, rows};
 
-    pretty(pixels);
-    std::string filename{"pretty.ppm"};
-    pixels.save_ppm(filename);
-    std::cout << "Wrote: " << filename << '\n';
+    Pixels solid_pixels{columns, rows};
+    set_color(solid_pixels, Navy);
+    std::string solid_filename{"navy.png"};
+    solid_pixels.save_png(solid_filename);
+    std::cout << "Wrote: " << solid_filename << '\n';
 
-    /*
-    // example:
-    set_color(pixels, White);
-    std::string filename{"white.png"};
-    pixels.save_png(filename);
-    std::cout << "Wrote: " << filename << '\n';
-    */
+    Pixels gradient_pixels{columns, rows};
+    gradient(gradient_pixels);
+    std::string gradient_filename{"gradient.png"};
+    gradient_pixels.save_png(gradient_filename);
+    std::cout << "Wrote: " << gradient_filename << '\n';
+
+    Pixels pretty_pixels{columns, rows};
+    pretty(pretty_pixels);
+    std::string pretty_filename{"pretty.png"};
+    pretty_pixels.save_png(pretty_filename);
+    std::cout << "Wrote: " << pretty_filename << '\n';
 }
