@@ -8,11 +8,23 @@ Pixels::Pixels(int columns, int rows)
 }
 
 const Color& Pixels::operator()(int row, int col) const {
-    return values.at(row * columns + col);
+    // JMB: missing bounds checking for row, col
+    // It's possible to be a valid index with row = 0, col = 2000
+    if (row < rows && col < columns) {
+        return values.at(row * columns + col);
+    }
+    std::string msg {"Pixel coordinate (" + std::to_string(col) + ", " + std::to_string(row) + ')'};
+    msg += " is out of bounds. Valid bounds: (0-" + std::to_string(columns) + ", 0-" + std::to_string(rows) + ')';
+    throw std::out_of_range(msg);
 }
 
 Color& Pixels::operator()(int row, int col) {
-    return values.at(row * columns + col);
+    if (row < rows && col < columns) {
+        return values.at(row * columns + col);
+    }
+    std::string msg {"Pixel coordinate (" + std::to_string(col) + ", " + std::to_string(row) + ')'};
+    msg += " is out of bounds. Valid bounds: (0-" + std::to_string(columns) + ", 0-" + std::to_string(rows) + ')';
+    throw std::out_of_range(msg);
 }
 
 void Pixels::save_ppm(const std::string& filename) {
