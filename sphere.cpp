@@ -16,13 +16,18 @@ std::optional<double> Sphere::intersect(const Ray &ray) const {
         return ray_proj;
     }
     if (q2 < radius * radius) { // Double hit!
-        const double h = std::sqrt(r2 - q2 );
+        const double h = std::sqrt(r2 - q2);
 
         // ray_proj(ection) is a point inside sphere
         // h = distance to surface of sphere (from ray_proj point)
         // ray_proj - h = closer (first) point on sphere surface <-- the one we want!
         // ray_proj + h = further (second) point on sphere surface
-        return ray_proj - h;
+
+        // Was previously just returning 'ray_proj - h' instead of checking it against epsilon again
+        if (ray_proj - h > Constants::epsilon) {
+            return ray_proj - h;
+        }
+        return std::nullopt;
     }
     return std::nullopt; // Miss :(
 }
