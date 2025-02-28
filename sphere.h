@@ -1,13 +1,15 @@
 #pragma once
 
 #include "point3d.h"
-#include "ray.h"
 #include "hit.h"
+#include "ray.h"
 #include <optional>
+
+class Material;
 
 class Sphere {
 public:
-    Sphere(const Point3D& center, double radius);
+    Sphere(const Point3D& center, double radius, const Material* material=nullptr);
 
     std::optional<double> algebraic_intersect(const Ray& ray) const;
     std::optional<double> intersect(const Ray& ray) const;
@@ -15,4 +17,6 @@ public:
 
     Point3D center;
     double radius;
+
+    const Material* material;
 };

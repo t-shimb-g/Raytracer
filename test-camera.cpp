@@ -9,7 +9,7 @@ int main() {
 
     Pixels pixels {1280, 720};
 
-    Vector3D position {5, -5, 5}, up {0, 0, 1};
+    Vector3D position {5, -5, 0}, up {0, 0, 1};
     Vector3D target {sphere.center};
     double fov {90};
     double aspect = static_cast<double>(pixels.columns) / pixels.rows;

@@ -2,8 +2,8 @@
 #include "constants.h"
 #include <cmath>
 
-Sphere::Sphere(const Point3D &center, double radius)
-    : center{center}, radius{radius} {}
+Sphere::Sphere(const Point3D &center, double radius, const Material* material)
+    : center{center}, radius{radius}, material{material} {}
 
 std::optional<double> Sphere::intersect(const Ray &ray) const {
     const Vector3D point_to_center = center - ray.origin;
@@ -20,14 +20,17 @@ std::optional<double> Sphere::intersect(const Ray &ray) const {
 
         // ray_proj(ection) is a point inside sphere
         // h = distance to surface of sphere (from ray_proj point)
-        // ray_proj - h = closer (first) point on sphere surface <-- the one we want!
-        // ray_proj + h = further (second) point on sphere surface
+        // ray_proj - h = closer (first) point on sphere surface [return if ray origin is OUTSIDE sphere]
+        // ray_proj + h = further (second) point on sphere surface [return if ray origin is INSIDE sphere
+        if (length(point_to_center) < radius) { // Inside sphere!
+            return ray_proj + h;
+        }
 
         // Was previously just returning 'ray_proj - h' instead of checking it against epsilon again
-        if (ray_proj - h > Constants::epsilon) {
-            return ray_proj - h;
+        if (ray_proj - h < 0) {
+            return std::nullopt;
         }
-        return std::nullopt;
+        return ray_proj - h;
     }
     return std::nullopt; // Miss :(
 }
@@ -54,5 +57,5 @@ Hit Sphere::construct_hit(const Ray &ray, double time) const {
     // Calculate the surface normal
     Point3D point = ray.at(time);
     Vector3D normal = (point - center) / radius; // Calling unit() is too expensive - Might come back and bite us
-    return Hit{time, point, normal};
+    return Hit{time, point, normal, this};
 }
