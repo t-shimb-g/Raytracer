@@ -1,9 +1,10 @@
 #include "sphere.h"
+#include "ray.h"
 #include "constants.h"
 #include <cmath>
 
 Sphere::Sphere(const Point3D &center, double radius, const Material* material)
-    : center{center}, radius{radius}, material{material} {}
+    : Object{material}, center{center}, radius{radius} {}
 
 std::optional<double> Sphere::intersect(const Ray &ray) const {
     const Vector3D point_to_center = center - ray.origin;
@@ -15,7 +16,7 @@ std::optional<double> Sphere::intersect(const Ray &ray) const {
     if (std::abs(q2 - r2) <= Constants::epsilon) { // Single hit!
         return ray_proj;
     }
-    if (q2 < radius * radius) { // Double hit!
+    if (q2 < r2) { // Double hit!
         const double h = std::sqrt(r2 - q2);
 
         // ray_proj(ection) is a point inside sphere
@@ -25,12 +26,10 @@ std::optional<double> Sphere::intersect(const Ray &ray) const {
         if (length(point_to_center) < radius) { // Inside sphere!
             return ray_proj + h;
         }
-
-        // Was previously just returning 'ray_proj - h' instead of checking it against epsilon again
-        if (ray_proj - h < 0) {
+        if (ray_proj - h < 0) { // Somehow this can end up being negative, and that's bad
             return std::nullopt;
         }
-        return ray_proj - h;
+        return ray_proj - h; // Outside sphere!
     }
     return std::nullopt; // Miss :(
 }

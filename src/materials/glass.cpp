@@ -19,9 +19,9 @@ Ray Glass::scatter(const Ray& ray, const Hit& hit) const {
     }
 
     double cos_theta = -dot(ray.direction, normal);
-    double probability = 1; // schlick(cos_theta, n1/n2);
+    double probability = schlick(cos_theta, n1/n2);
 
-    if (random() < probability) { // [0, 1) < probability
+    if (random_double() < probability) { // [0, 1) < probability
         Vector3D reflected = reflect(ray.direction, normal);
         return Ray{hit.position, reflected};
     }

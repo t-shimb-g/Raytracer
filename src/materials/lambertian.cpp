@@ -7,9 +7,6 @@ Lambertian::Lambertian(Color color, bool emitting)
     : Material{"lambertian", color, emitting} {}
 
 Ray Lambertian::scatter(const Ray&, const Hit& hit) const {
-    // Random point on sphere
-    Point3D sphere_surface_point = (hit.position + hit.normal) + random_unit_vector();
-
-    Vector3D scattered = sphere_surface_point - hit.position;
+    Vector3D scattered = hit.normal + random_unit_vector();
     return Ray{hit.position, scattered};
 }

@@ -32,8 +32,8 @@ int main() {
     for (auto row = 0; row < pixels.rows; ++row) {
         for (auto col = 0; col < pixels.columns; ++col) {
             for (int N = 0; N < samples; ++N) {
-                double y = (row + random()) / (pixels.rows - 1);
-                double x = (col + random()) / (pixels.columns - 1);
+                double y = (row + random_double()) / (pixels.rows - 1);
+                double x = (col + random_double()) / (pixels.columns - 1);
                 // cast samples number of rays (for antialiasing)
                 Ray ray = camera.compute_ray(x, y);
                 pixels(row, col) += trace(world, ray);
