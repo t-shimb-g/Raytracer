@@ -10,46 +10,30 @@
 #include "lambertian.h"
 #include "specular.h"
 #include "metallic.h"
+#include "glass.h"
 #include "random.h"
+#include "parser.h"
 #include <cmath>
 #include <iomanip>
 
 void print_progress(long long ray_num, long long total_rays);
 Color trace(const World& world, const Ray& ray);
 Color trace_path(const World& world, const Ray& ray, int depth);
+void render();
 
-int main() {
-    // materials
-    Lambertian blue{Blue, false};
-    Lambertian red{Red, false};
-    Specular mirror{White, false};
-    Metallic gold{Yellow, false, 0.3};
-    Diffuse diff_green{Green, false};
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        std::cout << "Usage: " << argv[0] << " {filename}\n";
+        return 0;
+    }
 
-    Diffuse gray{{0.5, 0.5, 0.5}, false};
-    Diffuse light{{1, 1, 1}, true};
+    Parser parser{argv[1]};
+    World world = parser.get_world();
+    Pixels pixels = parser.get_pixels();
+    Camera camera = parser.get_camera();
 
-    // world
-    World world;
-    world.add({1010, 0, 0}, 1000, &mirror);
-    world.add({-1010, 0, 0}, 1000, &mirror);
-    world.add({0, 1010, 0}, 1000, &mirror);
-    world.add({0, -1010, 0}, 1000, &mirror);
-    world.add({0, 0, 1010}, 1000, &light);
-    world.add({0, 0, -1010}, 1000, &gray);
-    world.add({0, 0, 0}, 1, &red);
-    // specify the number of pixels
-    Pixels pixels{1920, 1080};
-
-    // create the camera
-    Vector3D position{6, 0, 3}, up{0, 0, 1};
-    Vector3D target{0, 0, 0};
-    double fov{90};
-    double aspect = static_cast<double>(pixels.columns) / pixels.rows;
-    Camera camera{position, target, up, fov, aspect};
-
-    constexpr int samples = 5000;
-    constexpr int ray_depth = 20;
+    int ray_depth = parser.ray_depth;
+    int samples = parser.ray_samples;
 
     // Track progress
     const long long total_rays = pixels.rows * pixels.columns * static_cast<long long>(samples);
@@ -60,8 +44,8 @@ int main() {
     for (auto row = 0; row < pixels.rows; ++row) {
         for (auto col = 0; col < pixels.columns; ++col) {
             for (int N = 0; N < samples; ++N) {
-                double y = (row + random()) / (pixels.rows - 1);
-                double x = (col + random()) / (pixels.columns - 1);
+                double y = (row + random_double()) / (pixels.rows - 1);
+                double x = (col + random_double()) / (pixels.columns - 1);
                 // cast samples number of rays (for antialiasing)
                 Ray ray = camera.compute_ray(x, y);
                 pixels(row, col) += trace_path(world, ray, ray_depth);
@@ -74,9 +58,8 @@ int main() {
             pixels(row, col) /= samples;
         }
     }
-    std::string filename{"sphere.png"};
-    pixels.save_png(filename);
-    std::cout << "\n\nWrote " << filename << '\n';
+    pixels.save_png(parser.filename);
+    std::cout << "\n\nWrote " << parser.filename << '\n';
 }
 
 void print_progress(long long ray_num, long long total_rays) {

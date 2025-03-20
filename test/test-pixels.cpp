@@ -1,4 +1,4 @@
-#include "pixels.h"
+#include "../src/image/pixels.h"
 #include "color.h"
 
 // write a function to set all the pixels to the same color
