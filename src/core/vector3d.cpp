@@ -114,7 +114,7 @@ Vector3D cross(const Vector3D& a, const Vector3D& b) {
 }
 
 double length(const Vector3D& v) {
-    return std::pow( std::pow(v.x, 2) + std::pow(v.y, 2) + std::pow(v.z, 2), 0.5 );
+    return std::sqrt( (v.x * v.x) + (v.y * v.y) + (v.z * v.z) );
 }
 
 Vector3D unit(const Vector3D& v) {
