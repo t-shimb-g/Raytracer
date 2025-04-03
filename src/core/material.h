@@ -1,19 +1,19 @@
 #pragma once
 
-#include "color.h"
+#include "texture.h"
 
 class Ray;
 class Hit;
 
 class Material {
 public:
-    Material(std::string name, Color color, bool emitting);
+    Material(std::string name, const Texture* texture, bool emitting);
 
     virtual Ray scatter(const Ray& ray, const Hit& hit) const = 0;
     virtual ~Material() = default;
 
     std::string name;
-    Color color;
+    const Texture* texture;
     bool emitting;
 };
 

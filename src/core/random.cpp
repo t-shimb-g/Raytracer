@@ -3,9 +3,9 @@
 #include "pcg_random.hpp"
 
 double random_double() {
-    static pcg_extras::seed_seq_from<std::random_device> seed_source; // Seed with a real random value, if available
-    static pcg32 engine(seed_source); // Make a random number engine
-    static std::uniform_real_distribution<double> distribution{0, 1};
+    static thread_local pcg_extras::seed_seq_from<std::random_device> seed_source; // Seed with a real random value, if available
+    static thread_local pcg32 engine(seed_source); // Make a random number engine
+    static thread_local std::uniform_real_distribution<double> distribution{0, 1};
     return distribution(engine);
 }
 
@@ -14,9 +14,9 @@ double random_double(double min, double max) {
 }
 
 double old_random_double() {
-    static std::random_device rd;
-    static std::mt19937 engine {rd()};
-    static std::uniform_real_distribution<double> distribution{0, 1};
+    static thread_local std::random_device rd;
+    static thread_local std::mt19937 engine {rd()};
+    static thread_local std::uniform_real_distribution<double> distribution{0, 1};
     return distribution(engine);
 }
 

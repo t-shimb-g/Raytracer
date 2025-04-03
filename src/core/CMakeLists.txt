@@ -11,6 +11,7 @@ add_library(core
     pcg_random.hpp
     pcg_extras.hpp
     pcg_uint128.hpp
+    texture.h texture.cpp
 )
 
 target_include_directories(core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

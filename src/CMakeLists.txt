@@ -2,6 +2,7 @@ add_subdirectory(core)
 add_subdirectory(materials)
 add_subdirectory(image)
 add_subdirectory(objects)
+add_subdirectory(textures)
 
 add_library(raytracer
     camera.h camera.cpp
@@ -10,4 +11,4 @@ add_library(raytracer
 )
 
 target_include_directories(raytracer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(raytracer PUBLIC core materials image objects)
+target_link_libraries(raytracer PUBLIC core materials image objects textures)

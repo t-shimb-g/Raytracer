@@ -8,6 +8,7 @@
 class Pixels {
 public:
     Pixels(int columns, int rows);
+    Pixels(const std::string& filename);
 
     const Color& operator()(int row, int col) const; // get pixel value
     Color& operator()(int row, int col); // set pixel value
@@ -15,7 +16,7 @@ public:
     void save_ppm(const std::string& filename);
     void save_png(const std::string& filename);
 
-    const int columns, rows;
+    int columns, rows;
     std::vector<Color> values;
 };
 

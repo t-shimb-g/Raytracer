@@ -16,6 +16,7 @@
 #include <cmath>
 #include <iomanip>
 #include <chrono>
+#include <thread>
 
 using Time = std::chrono::time_point<std::chrono::system_clock>;
 
@@ -23,55 +24,67 @@ void print_progress(long long ray_num, long long total_rays, const Time start);
 Color trace(const World& world, const Ray& ray);
 Color trace_path(const World& world, const Ray& ray, int depth);
 Color iterative_trace_path(const World& world, const Ray& ray, int depth);
+void render(const World& world, const Camera& camera, int ray_depth, int samples, int num_threads, Pixels& pixels, bool progress=false);
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
         std::cout << "Usage: " << argv[0] << " {filename}\n";
         return 0;
     }
+    try {
+        Parser parser{argv[1]};
+        World world = parser.get_world();
+        Pixels pixels = parser.get_pixels();
+        Camera camera = parser.get_camera();
 
-    Parser parser{argv[1]};
-    World world = parser.get_world();
-    Pixels pixels = parser.get_pixels();
-    Camera camera = parser.get_camera();
+        int ray_depth = parser.ray_depth;
+        int samples = parser.ray_samples;
+        int num_threads = parser.num_threads;
+        Time render_start = std::chrono::system_clock::now();
 
-    int ray_depth = parser.ray_depth;
-    int samples = parser.ray_samples;
-
-    // Track progress
-    const long long total_rays = pixels.rows * pixels.columns * static_cast<long long>(samples);
-    long long ray_num = 0;
-    Time render_start = std::chrono::system_clock::now();
-
-    // Initial progress bar print
-    print_progress(ray_num, total_rays, render_start);
-    Time percent_start = std::chrono::system_clock::now();
-
-    for (auto row = 0; row < pixels.rows; ++row) {
-        for (auto col = 0; col < pixels.columns; ++col) {
-            for (int N = 0; N < samples; ++N) {
-                double y = (row + random_double()) / (pixels.rows - 1);
-                double x = (col + random_double()) / (pixels.columns - 1);
-                // cast samples number of rays (for antialiasing)
-                Ray ray = camera.compute_ray(x, y);
-                pixels(row, col) += trace_path(world, ray, ray_depth);
-
-                ++ray_num;
-                if (ray_num % (total_rays / 100) == 0) {
-                    print_progress(ray_num, total_rays, percent_start);
-                    percent_start = std::chrono::system_clock::now();
-                }
-            }
-            pixels(row, col) /= samples;
+        // Create n-1 images for the additional threads
+        std::vector<Pixels> images;
+        for (int i = 0; i < num_threads - 1; ++i) {
+            images.push_back(pixels);
         }
+
+        // Launch additional threads
+        std::vector<std::thread> threads;
+        for (int i = 0; i < num_threads - 1; ++i) {
+            std::thread t{render, std::ref(world), camera, ray_depth, static_cast<double>(samples)/num_threads, num_threads, std::ref(images.at(i)), false};
+            threads.push_back(std::move(t));
+        }
+
+        // Render on main thread
+        render(world, camera, ray_depth, static_cast<double>(samples)/num_threads, num_threads, pixels, true);
+
+        // Wait for other threads to finish
+        for (std::thread& t : threads) {
+            t.join();
+        }
+
+        // Collect all image data
+        for (const Pixels& p : images) {
+            for (std::size_t i = 0; i < p.values.size(); ++i) {
+                pixels.values.at(i) += p.values.at(i);
+            }
+        }
+
+        // Normalize color values by the number of threads
+        for (Color& c : pixels.values) {
+            c /= num_threads;
+        }
+
+        Time render_end = std::chrono::system_clock::now();
+        auto duration = std::chrono::duration<double>(render_end - render_start);
+
+        pixels.save_png(parser.filename);
+        std::cout << "\n\nWrote " << parser.filename << '\t';
+        std::cout << "Time: " << duration << '\n';
     }
-
-    Time render_end = std::chrono::system_clock::now();
-    auto duration = std::chrono::duration<double>(render_end - render_start);
-
-    pixels.save_png(parser.filename);
-    std::cout << "\n\nWrote " << parser.filename << '\t';
-    std::cout << "Time: " << duration << '\n';
+    catch(std::exception& err) {
+        std::cout << err.what() << '\n';
+    }
 }
 
 void print_progress(long long ray_num, long long total_rays, const Time start) {
@@ -124,42 +137,50 @@ Color trace_path(const World& world, const Ray& ray, int depth) {
         return Black; // Artifacts(?)
     }
 
-    const Material* material = hit->sphere->material;
+    const Object* object = hit->object;
+    auto [u, v] = object->uv(*hit);
+    const Material* material = object->material;
+    Color color = material->texture->value(u, v);
+
     if (material->emitting) {
-        return material->color;
+        return color;
     }
 
     // more bounces!
     Ray scattered = material->scatter(ray, hit.value());
-    return material->color * trace_path(world, scattered, depth-1);
+    return color * trace_path(world, scattered, depth-1);
 }
 
-Color iterative_trace_path(const World& world, const Ray& ray, int depth) {
-    Ray r = ray;
-    Color final_color = White;
+void render(const World& world, const Camera& camera, int ray_depth, int samples, int num_threads, Pixels& pixels, bool progress) {
+    // Track progress
+    const long long total_rays = pixels.rows * pixels.columns * static_cast<long long>(samples);
+    long long ray_num = 0;
+    Time render_start = std::chrono::system_clock::now();
 
-    // Gather all colors
-    while (depth > 0) {
-        std::optional<Hit> hit = world.find_nearest(r);
-        if (!hit) {
-            return Black;
-        }
-
-        const Material* material = hit->sphere->material;
-        final_color *= material->color;
-
-        if (material->emitting) {
-            return final_color;
-        }
-        r = material->scatter(r, hit.value());
-
-        --depth;
+    if (progress) {
+        print_progress(ray_num*num_threads, total_rays*num_threads, render_start);
     }
 
-    if (depth == 0) {
-        return Black;
-    }
-    else {
-        return final_color;
+    // Initial progress bar print
+    Time percent_start = std::chrono::system_clock::now();
+
+    for (auto row = 0; row < pixels.rows; ++row) {
+        for (auto col = 0; col < pixels.columns; ++col) {
+            Color color = {0, 0, 0};
+            for (int N = 0; N < samples; ++N) {
+                double y = (row + random_double()) / (pixels.rows - 1);
+                double x = (col + random_double()) / (pixels.columns - 1);
+                // cast samples number of rays (for antialiasing)
+                Ray ray = camera.compute_ray(x, y);
+                color += trace_path(world, ray, ray_depth);
+
+                ++ray_num;
+                if (progress && ray_num % (total_rays / 100) == 0) {
+                    print_progress(ray_num*num_threads, total_rays*num_threads, percent_start);
+                    percent_start = std::chrono::system_clock::now();
+                }
+            }
+            pixels(row, col) = color / samples;
+        }
     }
 }

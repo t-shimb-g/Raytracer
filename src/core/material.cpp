@@ -1,8 +1,8 @@
 #include "material.h"
 #include <cmath>
 
-Material::Material(std::string name, Color color, bool emitting)
-    : name{name}, color{color}, emitting{emitting} {}
+Material::Material(std::string name, const Texture* texture, bool emitting)
+    : name{name}, texture{texture}, emitting{emitting} {}
 
 std::ostream& operator<<(std::ostream& os, const Material& material) {}
 

@@ -3,8 +3,8 @@
 #include "hit.h"
 #include "ray.h"
 
-Metallic::Metallic(Color color, bool emitting, double fuzz)
-    : Material{"metallic", color, emitting}, fuzz{fuzz} {}
+Metallic::Metallic(const Texture* texture, bool emitting, double fuzz)
+    : Material{"metallic", texture, emitting}, fuzz{fuzz} {}
 
 Ray Metallic::scatter(const Ray& ray, const Hit& hit) const {
     Vector3D reflection = reflect(ray.direction, hit.normal);

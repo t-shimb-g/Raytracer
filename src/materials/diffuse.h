@@ -4,7 +4,7 @@
 
 class Diffuse : public Material {
 public:
-    Diffuse(Color color, bool emitting); // Hardcode name
+    Diffuse(const Texture* texture, bool emitting); // Hardcode name
 
     Ray scatter(const Ray& ray, const Hit& hit) const override;
 };

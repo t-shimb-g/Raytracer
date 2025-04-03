@@ -4,8 +4,8 @@
 #include "random.h"
 #include <algorithm>
 
-Glass::Glass(Color color, bool emitting)
-    : Material{"glass", color, emitting} {}
+Glass::Glass(const Texture* texture, bool emitting)
+    : Material{"glass", texture, emitting} {}
 
 Ray Glass::scatter(const Ray& ray, const Hit& hit) const {
     // Hardcoded values (standard glass index)

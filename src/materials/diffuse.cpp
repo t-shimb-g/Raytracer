@@ -3,8 +3,8 @@
 #include "hit.h"
 #include "ray.h"
 
-Diffuse::Diffuse(Color color, bool emitting)
-    : Material{"diffuse", color, emitting} {}
+Diffuse::Diffuse(const Texture* texture, bool emitting)
+    : Material{"diffuse", texture, emitting} {}
 
 Ray Diffuse::scatter(const Ray& ray, const Hit &hit) const {
     Vector3D scattered = random_hemisphere(hit.normal);

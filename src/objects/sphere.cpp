@@ -58,3 +58,13 @@ Hit Sphere::construct_hit(const Ray &ray, double time) const {
     Vector3D normal = (point - center) / radius; // Calling unit() is too expensive - Might come back and bite us
     return Hit{time, point, normal, this};
 }
+
+std::pair<double, double> Sphere::uv(const Hit& hit) const {
+    double theta = std::acos(hit.normal.z); // [0, pi]
+    double phi = std::atan2(hit.normal.y, hit.normal.x); // [-pi, pi]
+
+    double u = 0.5 + phi / (2 * Constants::pi); // [0, 1]
+    double v = theta / Constants::pi; // [0, 1]
+
+    return {u, v};
+}

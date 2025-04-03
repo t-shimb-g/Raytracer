@@ -29,3 +29,7 @@ target_link_libraries(test-world PRIVATE raytracer)
 # test parser
 add_executable(test-parser test-parser.cpp)
 target_link_libraries(test-parser PRIVATE raytracer)
+
+# test triangle
+add_executable(test-triangle test-triangle.cpp)
+target_link_libraries(test-triangle PRIVATE raytracer)
