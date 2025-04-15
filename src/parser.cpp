@@ -9,6 +9,7 @@
 #include "pixels.h"
 #include "sphere.h"
 #include "triangle.h"
+#include "rectangle.h"
 #include "solid.h"
 #include "gradient.h"
 #include "image.h"
@@ -53,6 +54,9 @@ void Parser::parse(std::ifstream& input) {
             std::stringstream ss{line};
             std::string type;
             ss >> type; // gets the first word
+
+            // std::map<std::string, std::function>
+
             if (type == "material") {
                 parse_material(ss);
             }
@@ -64,6 +68,9 @@ void Parser::parse(std::ifstream& input) {
             }
             else if (type == "triangle") {
                 parse_triangle(ss);
+            }
+            else if (type == "rectangle") {
+                parse_rectangle(ss);
             }
             else if (type == "mesh") {
                 parse_mesh(ss);
@@ -88,7 +95,7 @@ void Parser::parse(std::ifstream& input) {
             }
         }
         catch (std::runtime_error& e) {
-            std::cout << "Error when parsing line:\n" << line;
+            std::cout << "Error when parsing line:\n" << line << '\n';
             throw e;
         }
     }
@@ -196,6 +203,21 @@ void Parser::parse_triangle(std::stringstream& ss) {
     }
     else {
         throw std::runtime_error("Malformed triangle");
+    }
+}
+
+void Parser::parse_rectangle(std::stringstream &ss) {
+    Point3D origin;
+    Vector3D bottom_edge;
+    double height;
+    std::string material_name;
+    if (ss >> origin >> bottom_edge >> height >> material_name) {
+        const Material* material = get_material(material_name);
+        std::unique_ptr<Object> object = std::make_unique<Rectangle>(origin, bottom_edge, height, material);
+        world.add(std::move(object));
+    }
+    else {
+        throw std::runtime_error("Malformed rectangle");
     }
 }
 

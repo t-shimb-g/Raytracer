@@ -4,6 +4,7 @@ add_library(materials
     specular.h specular.cpp
     glass.h glass.cpp
     metallic.h metallic.cpp
+    isotropic.h isotropic.cpp
 )
 
 target_include_directories(materials PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

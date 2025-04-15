@@ -12,6 +12,7 @@ class Sphere : public Object{
 public:
     Sphere(const Point3D& center, double radius, const Material* material=nullptr);
 
+    AABB bounding_box() const override;
     std::optional<double> algebraic_intersect(const Ray& ray) const;
     std::optional<double> intersect(const Ray& ray) const override;
     Hit construct_hit(const Ray& ray, double time) const override;
