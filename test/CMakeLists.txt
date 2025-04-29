@@ -33,3 +33,15 @@ target_link_libraries(test-parser PRIVATE raytracer)
 # test triangle
 add_executable(test-triangle test-triangle.cpp)
 target_link_libraries(test-triangle PRIVATE raytracer)
+
+# test fog
+add_executable(test-fog test-fog.cpp)
+target_link_libraries(test-fog PRIVATE raytracer)
+
+# test BVH
+add_executable(test-bvh test-bvh.cpp)
+target_link_libraries(test-bvh PRIVATE raytracer)
+
+# test BVH intersection
+add_executable(test-bvh2 test-bvh2.cpp)
+target_link_libraries(test-bvh2 PRIVATE raytracer)

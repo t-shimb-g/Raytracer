@@ -5,17 +5,20 @@
 #include "lambertian.h"
 #include "specular.h"
 #include "glass.h"
+#include "isotropic.h"
 #include "camera.h"
 #include "pixels.h"
 #include "sphere.h"
 #include "triangle.h"
 #include "rectangle.h"
+#include "constant_medium.h"
 #include "solid.h"
 #include "gradient.h"
 #include "image.h"
 #include "checkerboard.h"
 #include "surf_norm.h"
 #include "function2d.h"
+#include "marble.h"
 #include <fstream>
 #include <algorithm>
 #include <iostream>
@@ -74,6 +77,9 @@ void Parser::parse(std::ifstream& input) {
             }
             else if (type == "mesh") {
                 parse_mesh(ss);
+            }
+            else if (type == "constant_medium") {
+                parse_constant_medium(ss);
             }
             else if (type == "output") {
                 parse_output(ss);
@@ -164,8 +170,11 @@ void Parser::parse_material(std::stringstream& ss) {
     else if (kind == "glass") {
         materials[name] = std::make_unique<Glass>(texture, emitting);
     }
+    else if (kind == "isotropic") {
+        materials[name] = std::make_unique<Isotropic>(texture, emitting);
+    }
     else {
-        throw std::runtime_error("Unknown material kind: " + name);
+        throw std::runtime_error("Unknown material kind: " + kind);
     }
 }
 
@@ -266,6 +275,22 @@ void Parser::parse_mesh(std::stringstream& ss) {
     }
 }
 
+void Parser::parse_constant_medium(std::stringstream& ss) {
+    // Only allows for spherical boundaries
+    Point3D center;
+    double radius, density;
+    std::string material_name;
+    if (ss >> center >> radius >> density >> material_name) {
+        const Material* material = get_material(material_name);
+        auto boundary = new Sphere{center, radius, material};
+        std::unique_ptr<Object> object = std::make_unique<ConstantMedium>(boundary, density, material);
+        world.add(std::move(object));
+    }
+    else {
+        throw std::runtime_error("Malformed constant_medium");
+    }
+}
+
 void Parser::parse_camera(std::stringstream& ss) {
     if (ss >> camera_position >> camera_target >> camera_up >> camera_fov) {
         found_camera = true;
@@ -360,6 +385,9 @@ void Parser::parse_texture(std::stringstream& ss) {
         else {
             throw std::runtime_error("Missing color for " + kind + " texture: " + name);
         }
+    }
+    else if (kind == "marble") {
+        textures[name] = std::make_unique<Marble>();
     }
 }
 

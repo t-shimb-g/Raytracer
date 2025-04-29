@@ -31,17 +31,19 @@ private:
 
     void parse_material(std::stringstream& ss);
     Material* get_material(const std::string& material);
+    void parse_texture(std::stringstream& ss);
+    Texture* get_texture(const std::string& texture);
     void parse_sphere(std::stringstream& ss);
     void parse_triangle(std::stringstream& ss);
     void parse_rectangle(std::stringstream& ss);
     void parse_mesh(std::stringstream& ss);
+    void parse_constant_medium(std::stringstream& ss);
     void parse_camera(std::stringstream& ss);
     void parse_rays(std::stringstream& ss);
     void parse_pixels(std::stringstream& ss);
     void parse_output(std::stringstream& ss);
     void parse_threads(std::stringstream& ss);
-    void parse_texture(std::stringstream& ss);
-    Texture* get_texture(const std::string& texture);
+
 
     World world;
 
