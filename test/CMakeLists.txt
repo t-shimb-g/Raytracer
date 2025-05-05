@@ -2,6 +2,10 @@
 add_executable(test-vector test-vector3d.cpp)
 target_link_libraries(test-vector PRIVATE core)
 
+# test length function
+add_executable(test-length test-length.cpp)
+target_link_libraries(test-length PRIVATE core)
+
 # test pixel class
 add_executable(test-pixels test-pixels.cpp)
 target_link_libraries(test-pixels PRIVATE image)
@@ -45,3 +49,7 @@ target_link_libraries(test-bvh PRIVATE raytracer)
 # test BVH intersection
 add_executable(test-bvh2 test-bvh2.cpp)
 target_link_libraries(test-bvh2 PRIVATE raytracer)
+
+# main
+add_executable(main main.cpp)
+target_link_libraries(main PRIVATE raytracer)

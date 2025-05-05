@@ -13,6 +13,7 @@ add_library(core
     pcg_uint128.hpp
     texture.h texture.cpp
     aabb.h aabb.cpp
+    noise.h noise.cpp
 )
 
 target_include_directories(core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
