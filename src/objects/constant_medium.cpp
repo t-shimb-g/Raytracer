@@ -61,5 +61,5 @@ std::pair<double, double> ConstantMedium::uv(const Hit& hit) const {
 
 Hit ConstantMedium::construct_hit(const Ray& ray, double time) const {
     Point3D position = ray.at(time);
-    return Hit{time, position, -ray.direction, this}; //
+    return Hit{time, position, -ray.direction, this};
 }

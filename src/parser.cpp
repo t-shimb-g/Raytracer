@@ -12,6 +12,7 @@
 #include "triangle.h"
 #include "rectangle.h"
 #include "constant_medium.h"
+#include "terrain.h"
 #include "solid.h"
 #include "gradient.h"
 #include "image.h"
@@ -23,6 +24,8 @@
 #include <algorithm>
 #include <iostream>
 #include <sstream>
+
+#include "noise.h"
 
 Parser::Parser(const std::string& filename)
     : filename{filename} {
@@ -80,6 +83,9 @@ void Parser::parse(std::ifstream& input) {
             }
             else if (type == "constant_medium") {
                 parse_constant_medium(ss);
+            }
+            else if (type == "terrain") {
+                parse_terrain(ss);
             }
             else if (type == "output") {
                 parse_output(ss);
@@ -288,6 +294,26 @@ void Parser::parse_constant_medium(std::stringstream& ss) {
     }
     else {
         throw std::runtime_error("Malformed constant_medium");
+    }
+}
+
+void Parser::parse_terrain(std::stringstream &ss) {
+    // Only allows for spherical boundaries
+    Point3D center;
+    double radius, boundary_depth;
+    int noise_depth;
+    std::string material_name;
+    if (ss >> center >> radius >> material_name >> boundary_depth >> noise_depth) {
+        if (boundary_depth < 0) {
+            throw std::runtime_error("Boundary depth cannot be less than zero");
+        }
+        const Material* material = get_material(material_name);
+        auto boundary = new Sphere{center, radius + boundary_depth, material};
+        std::unique_ptr<Object> object = std::make_unique<Terrain>(boundary, material, noise_depth);
+        world.add(std::move(object));
+    }
+    else {
+        throw std::runtime_error("Malformed terrain");
     }
 }
 

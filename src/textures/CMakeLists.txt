@@ -6,6 +6,7 @@ add_library(textures
     checkerboard.h checkerboard.cpp
     function2d.h function2d.cpp
     interesting.h interesting.cpp
+    marble.h marble.cpp
 )
 
 target_include_directories(textures PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

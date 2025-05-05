@@ -45,3 +45,7 @@ target_link_libraries(test-bvh PRIVATE raytracer)
 # test BVH intersection
 add_executable(test-bvh2 test-bvh2.cpp)
 target_link_libraries(test-bvh2 PRIVATE raytracer)
+
+# main
+add_executable(main main.cpp)
+target_link_libraries(main PRIVATE raytracer)
