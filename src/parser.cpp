@@ -25,6 +25,8 @@
 #include <iostream>
 #include <sstream>
 
+#include "noise.h"
+
 Parser::Parser(const std::string& filename)
     : filename{filename} {
     std::ifstream input{filename};
